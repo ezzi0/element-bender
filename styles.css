@@ -29,6 +29,31 @@ main {
   background-color: hsla(249, 60%, 30%, 0.8);
 }
 
+/* .sprite-container {
+  width: 10%;
+  height: 22%;
+  overflow: hidden;
+  position: relative;
+} */
+
+.sprite {
+  width: 85px;
+  height: 85px;
+  background-image: url("./assets/images/enchantressSprite/Walk.png");
+  background-size: cover;
+  position: relative;
+  animation: animateSprite 0.5s steps(7) infinite;
+}
+
+@keyframes animateSprite {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}
+
 .images-Bending {
   display: flex;
   flex-wrap: wrap;
