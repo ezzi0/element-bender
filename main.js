@@ -1,11 +1,26 @@
 const gameArea = document.querySelector("main");
 const gameAreaBounding = gameArea.getBoundingClientRect(); //calculate gamearea based on resize.Add an event listener
 const speed = 5;
-const startGameButton = document.getElementById("start-game");
+let startGameButton = document.getElementById("start-game");
 const modal = document.getElementById("end-game");
 let avatar;
+let elements;
+let game;
+let gameStarted = false;
 
 const pressedKeys = { right: false, left: false, up: false, down: false };
+const pickedUpElements = [];
+const popImage = {
+  from: {
+    opacity: 0.1,
+    scale: 0.1,
+  },
+  to: {
+    opacity: 1,
+    scale: 1,
+  },
+  duration: 1000,
+};
 
 class Avatar {
   constructor() {
@@ -42,9 +57,11 @@ class Avatar {
   move(direction) {
     if (direction === "right" && this.canMoveRight()) {
       this.x += speed;
+      this.element.classList.remove("sprite-left");
     }
     if (direction === "left" && this.canMoveLeft()) {
       this.x -= speed;
+      this.element.classList.add("sprite-left");
     }
     if (direction === "up" && this.canMoveUp()) {
       this.y -= speed;
@@ -81,7 +98,6 @@ class Avatar {
   canMoveDown() {
     const elementBounding = this.element.getBoundingClientRect();
     if (elementBounding.bottom < gameAreaBounding.bottom) {
-      console.log(elementBounding.bottom, gameAreaBounding.bottom);
       return true;
     }
     return false;
@@ -111,14 +127,16 @@ class Avatar {
     if (parseInt(currentPositionX) - animationSpeed <= -spriteWidth) {
       sprite.style.backgroundPositionX = 0;
     }
-
+    let pressed = false;
     for (const key in pressedKeys) {
       if (pressedKeys[key]) {
         sprite.style.animationPlayState = "running";
+        pressed = true;
         break;
-      } else {
-        sprite.style.animationPlayState = "paused";
       }
+    }
+    if (!pressed) {
+      sprite.style.animationPlayState = "paused";
     }
 
     setTimeout(animateImage, 1000 / 60);
@@ -156,10 +174,155 @@ class Avatar {
   }
 }
 
-// const avatar = new Avatar();
+class Elements {
+  constructor() {
+    this.data = [
+      {
+        type: "fire",
+        image: "./assets/images/elements (1)/Fire.gif",
+      },
+      {
+        type: "wind",
+        image: "./assets/images/elements (1)/wind.gif",
+      },
+      {
+        type: "water",
+        image: "./assets/images/elements (1)/Water.gif",
+      },
+      {
+        type: "earth",
+        image: "./assets/images/elements (1)/Earth.gif",
+      },
+    ];
+    this.elements = [];
+    this.gameArea = document.querySelector("main");
+  }
 
-function startGame() {
-  avatar = new Avatar();
+  createElement() {
+    this.data.forEach((element) => {
+      const div = document.createElement("div");
+      const img = document.createElement("img");
+      img.src = element.image;
+      div.appendChild(img);
+      div.className = "element-container";
+      this.gameArea.appendChild(div);
+      this.setPositionOnMap(div);
+      this.elements.push(div);
+    });
+  }
+
+  setPositionOnMap(div) {
+    // Set the position of the div randomly within the map area
+    const mapWidth = this.gameArea.clientWidth;
+    const mapHeight = this.gameArea.clientHeight;
+    const divWidth = div.clientWidth;
+    const divHeight = div.clientHeight;
+    const randomLeft = Math.floor(Math.random() * (mapWidth - divWidth));
+    const randomTop = Math.floor(Math.random() * (mapHeight - divHeight));
+    div.style.left = randomLeft + "px";
+    div.style.top = randomTop + "px";
+    div.style.position = "absolute";
+  }
+}
+
+class Game {
+  constructor() {
+    this.avatar = new Avatar();
+    this.elements = new Elements();
+    this.elements.createElement();
+    this.animate();
+    this.addEventListener();
+    this.pickUpElements = this.pickUpElements.bind(this);
+  }
+
+  collisionDetectionAvatarElements(element) {
+    const avatarBounding = this.avatar.element.getBoundingClientRect();
+    const elementsBounding = element.getBoundingClientRect();
+    const isInX =
+      avatarBounding.left < elementsBounding.right &&
+      avatarBounding.right > elementsBounding.left;
+    const isInY =
+      avatarBounding.bottom > elementsBounding.top &&
+      avatarBounding.top < elementsBounding.bottom;
+    return isInX && isInY;
+    //   collusionDetectionAvatarElements(element) {
+    //     const avatarBounding = this.avatar.element.getBoundingClientRect();
+    //     console.log(element);
+    //     const elementsBounding = element.getBoundingClientRect();
+    //     console.log(avatarBounding.intersects(elementsBounding));
+    //     return avatarBounding.intersects(elementsBounding);
+  }
+
+  detectCollisions() {
+    for (const element of this.elements.elements) {
+      const collision = this.collisionDetectionAvatarElements(element);
+      if (collision) {
+        element.classList.add("colliding"); // Add a 'colliding' class to the element
+      } else {
+        element.classList.remove("colliding"); // Remove the 'colliding' class if not colliding
+      }
+    }
+  }
+
+  pickUpElements() {
+    const collidingElements = document.querySelectorAll(".colliding");
+    for (const element of collidingElements) {
+      pickedUpElements.push(element);
+      element.remove();
+    }
+    console.log(pickedUpElements);
+  }
+
+  //   pickUpElements() {
+  //     for (const element of this.elements.elements) {
+  //       const collision = this.collisionDetectionAvatarElements(element);
+  //       const div = gameArea.querySelector("div");
+  //       if (collision) {
+  //         pickedUpElements.push(element);
+  //         element.remove(div);
+  //         console.log(pickedUpElements);
+  //       }
+  //     }
+  //     return pickedUpElements;
+  //   }
+
+  updateElements() {
+    const isPresent = pickedUpElements.includes(element);
+    if (isPresent) {
+      element.style.animate(popImage);
+    }
+  }
+
+  animate() {
+    setInterval(() => {
+      this.detectCollisions();
+    }, 1000 / 60);
+  }
+  //   animate() {
+  //     setInterval(() => {
+  //       for (const element of this.elements.elements) {
+  //         this.pickUpElements(element);
+  //       }
+  //     }, 1000 / 60);
+  //   }
+  addEventListener() {
+    window.addEventListener("keydown", (event) => {
+      if (event.key === " ") {
+        event.preventDefault(); // prevent page scrolling
+        this.avatar.jump(avatar);
+      }
+      if (event.key === "e") {
+        event.preventDefault();
+        this.pickUpElements();
+      }
+    });
+  }
+}
+
+function startGame(event) {
+  event.target.disabled = true;
+  game = new Game();
+  gameStarted = true;
 }
 
 window.addEventListener("keydown", (event) => {
@@ -176,6 +339,13 @@ window.addEventListener("keydown", (event) => {
     case "ArrowDown":
       pressedKeys.down = true;
       break;
+    // case "e":
+    //   event.preventDefault();
+    //   if (game && gameStarted) {
+    //     // Check if the game instance exists and the game has started
+    //     game.pickUpElements(); // Call the pickUpElements method on the game instance
+    //   }
+    //   break;
   }
 });
 
@@ -193,13 +363,6 @@ window.addEventListener("keyup", (event) => {
     case "ArrowDown":
       pressedKeys.down = false;
       break;
-  }
-});
-
-window.addEventListener("keydown", (event) => {
-  if (event.key === " ") {
-    event.preventDefault(); // prevent page scrolling
-    avatar.jump(avatar);
   }
 });
 

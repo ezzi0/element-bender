@@ -16,18 +16,35 @@ main {
   position: relative;
 }
 
+main div img {
+  max-width: 100%;
+  /* height: 3rem; */
+  padding: 0.5rem;
+  border-radius: 1rem;
+  background: transparent;
+}
+
+.hideImage {
+  visibility: hidden;
+}
+
 .container {
   position: relative;
   height: 4rem;
 }
 
-.avatar {
+.element-container {
+  width: 3rem;
+  height: 3rem;
+}
+
+/* .avatar {
   position: absolute;
   height: 2rem;
   aspect-ratio: 1;
   border-radius: 100vh;
   background-color: hsla(249, 60%, 30%, 0.8);
-}
+} */
 
 /* .sprite-container {
   width: 10%;
@@ -43,6 +60,10 @@ main {
   background-size: cover;
   position: relative;
   animation: animateSprite 0.5s steps(7) infinite;
+}
+
+.sprite-left {
+  transform: scaleX(-1);
 }
 
 @keyframes animateSprite {
