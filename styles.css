@@ -24,11 +24,23 @@ main div img {
   background: transparent;
 }
 
-.hideImage {
-  visibility: hidden;
+@keyframes popImage {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
-.container {
+.pop {
+  animation: popImage 0.3s linear;
+}
+
+.image-container {
   position: relative;
   height: 4rem;
 }

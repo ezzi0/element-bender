@@ -10,17 +10,6 @@ let gameStarted = false;
 
 const pressedKeys = { right: false, left: false, up: false, down: false };
 const pickedUpElements = [];
-const popImage = {
-  from: {
-    opacity: 0.1,
-    scale: 0.1,
-  },
-  to: {
-    opacity: 1,
-    scale: 1,
-  },
-  duration: 1000,
-};
 
 class Avatar {
   constructor() {
@@ -194,7 +183,26 @@ class Elements {
         image: "./assets/images/elements (1)/Earth.gif",
       },
     ];
+    this.data1 = [
+      {
+        type: "fire",
+        image: "./assets/images/FireBending.png",
+      },
+      {
+        type: "wind",
+        image: "./assets/images/AirBending.png",
+      },
+      {
+        type: "water",
+        image: "./assets/images/WaterBending.png",
+      },
+      {
+        type: "earth",
+        image: "./assets/images/Earth Bending.png",
+      },
+    ];
     this.elements = [];
+    this.elementsCounter = [];
     this.gameArea = document.querySelector("main");
   }
 
@@ -208,6 +216,19 @@ class Elements {
       this.gameArea.appendChild(div);
       this.setPositionOnMap(div);
       this.elements.push(div);
+    });
+  }
+
+  createElementCounterHolder() {
+    const container = document.querySelector(".images-Bending");
+
+    this.data1.forEach((element) => {
+      const img = document.createElement("img");
+      img.src = element.image;
+      img.alt = element.alt || ""; // Optional: add alt attribute for better accessibility
+      img.className = "image-Size";
+      container.appendChild(img);
+      this.elementsCounter.push(img);
     });
   }
 
@@ -230,6 +251,7 @@ class Game {
     this.avatar = new Avatar();
     this.elements = new Elements();
     this.elements.createElement();
+    this.elements.createElementCounterHolder();
     this.animate();
     this.addEventListener();
     this.pickUpElements = this.pickUpElements.bind(this);
@@ -270,7 +292,6 @@ class Game {
       pickedUpElements.push(element);
       element.remove();
     }
-    console.log(pickedUpElements);
   }
 
   //   pickUpElements() {
@@ -289,7 +310,9 @@ class Game {
   updateElements() {
     const isPresent = pickedUpElements.includes(element);
     if (isPresent) {
-      element.style.animate(popImage);
+      element.classList.add("pop");
+    } else {
+      element.classList.remove("pop");
     }
   }
 
