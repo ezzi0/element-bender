@@ -1,5 +1,6 @@
 * {
   box-sizing: border-box;
+  font-family: "Gluten", cursive;
 }
 
 h1 {
@@ -112,6 +113,20 @@ main div img {
   transform: scaleX(-1);
 }
 
+.enemy {
+  width: 100px;
+  height: 100px;
+  background-image: url("./assets/images/knightSprite/Walk.png");
+  background-size: cover;
+  position: relative;
+  animation: animateSprite 0.5s steps(7) infinite;
+  z-index: 1;
+}
+
+.enemy-left {
+  transform: scaleX(-1);
+}
+
 @keyframes animateSprite {
   from {
     background-position: 100% 0;
@@ -189,4 +204,10 @@ main div img {
 
 .button:hover:before {
   width: 100%;
+}
+
+#message {
+  font: bold;
+  size: 20rem;
+  text-align: center;
 }

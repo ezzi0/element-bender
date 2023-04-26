@@ -5,8 +5,8 @@ let startGameButton = document.getElementById("start-game");
 const modal = document.getElementById("end-game");
 const timer = document.getElementById("time");
 const message = document.getElementById("message");
-const lock = document.querySelector(".lock");
 let avatar;
+let enemy;
 let elements;
 let game;
 let gameStarted = false;
@@ -16,12 +16,14 @@ let interval;
 
 const pressedKeys = { right: false, left: false, up: false, down: false };
 const pickedUpElements = [];
+const pickedUpMotherFucker = [];
 
 class Avatar {
   constructor() {
     this.element = this.createAvatar();
     this.x = gameArea.clientWidth / 2 - this.element.clientWidth / 2;
     this.y = gameArea.clientHeight / 2 - this.element.clientHeight / 2;
+    this.lives = 3;
     this.setAvatarPosition();
     this.animate();
     this.isJumping = false;
@@ -99,14 +101,14 @@ class Avatar {
   }
 
   animate() {
-    for (const key in pressedKeys) {
-      if (pressedKeys[key]) {
-        this.move(key);
-      }
-    }
-    let animationId = requestAnimationFrame(() => {
-      this.animate();
-    });
+    // for (const key in pressedKeys) {
+    //   if (pressedKeys[key]) {
+    //     this.move(key);
+    //   }
+    // }
+    // let animationId = requestAnimationFrame(() => {
+    //   this.animate();
+    // });
   }
 
   animateImage() {
@@ -169,15 +171,103 @@ class Avatar {
   addEvent() {
     window.addEventListener("keydown", (event) => {
       if (
-        event.keyCode === 37 ||
-        event.keyCode === 38 ||
-        event.keyCode === 39 ||
-        event.keyCode === 40
+        event.key === 37 ||
+        event.key === 38 ||
+        event.key === 39 ||
+        event.key === 40
       ) {
         event.preventDefault(); // prevent page scrolling
         this.animateImage();
       }
     });
+  }
+}
+
+class Enemy {
+  constructor(avatar) {
+    this.avatar = avatar;
+    this.element = this.createEnemy();
+    this.x = Math.random() * gameArea.clientWidth;
+    this.y = Math.random() * gameArea.clientHeight;
+    this.setEnemyPosition();
+    this.followAvatar();
+  }
+
+  createEnemy() {
+    const div = document.createElement("div");
+    div.classList.add("enemy");
+    gameArea.append(div);
+    return div;
+  }
+
+  setEnemyPosition() {
+    this.element.style.left = `${this.x}px`;
+    this.element.style.top = `${this.y}px`;
+  }
+
+  followAvatar() {
+    const follow = () => {
+      const dx = this.avatar.x - this.x;
+      const dy = this.avatar.y - this.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      if (distance > 0) {
+        const moveX = dx / distance;
+        const moveY = dy / distance;
+
+        const newX = this.x + moveX * speed;
+        const newY = this.y + moveY * speed;
+
+        if (newX > this.x) {
+          this.element.classList.remove("enemy-left");
+        } else if (newX < this.x) {
+          this.element.classList.add("enemy-left");
+        }
+
+        this.x = newX;
+        this.y = newY;
+        this.setEnemyPosition();
+      }
+
+      if (distance <= 1) {
+        // Collision detection: 5px distance
+        this.killAvatar();
+      } else {
+        requestAnimationFrame(follow);
+      }
+    };
+
+    follow();
+  }
+
+  killAvatar() {
+    const enemyBounding = this.element.getBoundingClientRect();
+    const avatarBounding = this.avatar.element.getBoundingClientRect();
+
+    const isInX =
+      enemyBounding.left < avatarBounding.right &&
+      enemyBounding.right > avatarBounding.left;
+    const isInY =
+      enemyBounding.top < avatarBounding.bottom &&
+      enemyBounding.bottom > avatarBounding.top;
+
+    const isColliding = isInX && isInY;
+
+    if (isColliding) {
+      this.avatar.lives -= 1;
+    }
+    if (this.avatar.lives <= 0) {
+      this.avatar.element.remove();
+      const gameOverMessage = document.createElement("div");
+      gameOverMessage.innerText = "Game Over";
+      gameOverMessage.style.position = "absolute";
+      gameOverMessage.style.left = "50%";
+      gameOverMessage.style.top = "50%";
+      gameOverMessage.style.transform = "translate(-50%, -50%)";
+      gameOverMessage.style.fontSize = "32px";
+      gameOverMessage.style.color = "red";
+      gameArea.appendChild(gameOverMessage);
+    }
   }
 }
 
@@ -230,6 +320,7 @@ class Elements {
     this.elements = [];
     this.elementsCounter = [];
     this.gameArea = document.querySelector("main");
+    setInterval(() => this.updateElementsPosition(), 4000);
   }
 
   createElement() {
@@ -272,18 +363,10 @@ class Elements {
     div.style.position = "absolute";
   }
 
-  combineElements() {
-    if (
-      pickedUpElements.includes("air") &&
-      pickedUpElements.includes("fire") &&
-      timeLeft > 0
-    ) {
-      clearInterval(interval);
-      lock.style.display = "none";
-      message.textContent = "Congratulations! you won";
-    } else {
-      message.textContent = "Invalid combination. Try again.";
-    }
+  updateElementsPosition() {
+    this.elements.forEach((element) => {
+      this.setPositionOnMap(element);
+    });
   }
 }
 
@@ -339,6 +422,7 @@ class Obstacle {
 class Game {
   constructor() {
     this.avatar = new Avatar();
+    this.enemy = new Enemy(this.avatar);
     this.elements = new Elements();
     this.obstacles = new Obstacle();
     this.obstacles.createObstacle();
@@ -347,6 +431,8 @@ class Game {
     this.animate();
     this.addEventListener();
     this.pickUpElements();
+    console.log(pickedUpElements);
+    // this.throwElements();
   }
 
   collisionDetectionAvatarElements(element) {
@@ -377,19 +463,33 @@ class Game {
     for (const element of collidingElements) {
       if (!pickedUpElements.includes(element)) {
         element.remove();
-        pickedUpElements.push(element.querySelector("img").alt);
+        pickedUpElements.push(element.querySelector("img").alt.split(" ")[0]);
+        pickedUpMotherFucker.push(element);
       }
+    }
+  }
+
+  throwElements() {
+    let elementToDrop = pickedUpMotherFucker.shift();
+    if (pickedUpMotherFucker !== "") {
+      gameArea.append(elementToDrop);
+    }
+    if (pickedUpElements !== "") {
+      pickedUpElements.shift();
     }
   }
 
   updateElements() {
     for (const element of this.elements.elementsCounter) {
-      const elementType = element.alt;
+      const elementType = element.alt.split(" ")[0];
       if (
         pickedUpElements.includes(elementType) &&
-        this.elements.elementsCounter.find((el) => el.alt === elementType)
+        this.elements.elementsCounter.find(
+          (el) => el.alt.split(" ")[0] === elementType
+        )
       ) {
         element.classList.add("pop");
+        console.log("sjhdjshdjshdjhdjs");
         continue;
       } else {
         element.classList.remove("pop");
@@ -397,8 +497,35 @@ class Game {
     }
   }
 
+  combineElements() {
+    console.log(pickedUpElements);
+    if (
+      pickedUpElements.includes("wind") &&
+      pickedUpElements.includes("fire") &&
+      timeLeft > 0
+    ) {
+      const lock = document.querySelector(".lock");
+
+      clearInterval(interval);
+      clearInterval(this.gameIntervalId);
+      lock.style.display = "none";
+      message.textContent = "Congratulations! you saved the princess";
+    } else {
+      if (pickedUpElements.length >= 2) {
+        message.textContent =
+          "The combination of elements you chose doesn't open the lock, Try again.";
+      }
+    }
+  }
+
   animate() {
-    setInterval(() => {
+    this.gameIntervalId = setInterval(() => {
+      for (const key in pressedKeys) {
+        if (pressedKeys[key]) {
+          this.avatar.move(key);
+        }
+      }
+      // this.combineElements();
       this.detectCollisions();
       this.avatar.addEvent();
     }, 1000 / 60);
@@ -415,6 +542,11 @@ class Game {
       if (event.key === " ") {
         event.preventDefault(); // prevent page scrolling
         this.avatar.jump(avatar);
+      }
+      if (event.key === "t") {
+        console.log("test t");
+        // event.preventDefault();
+        this.throwElements();
       }
       if (event.key === "e") {
         event.preventDefault();
@@ -433,6 +565,7 @@ class Game {
           //     })
           // this.updateElements();
         }
+        this.combineElements();
       }
     });
   }
