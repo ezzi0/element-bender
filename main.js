@@ -63,14 +63,14 @@ class Avatar {
 
   canMoveRight() {
     const elementBounding = this.element.getBoundingClientRect();
-    if (elementBounding.right < gameAreaBounding.right) {
+    if (elementBounding.right - 40 < gameAreaBounding.right) {
       return true;
     }
     return false;
   }
   canMoveLeft() {
     const elementBounding = this.element.getBoundingClientRect();
-    if (elementBounding.left > gameAreaBounding.left) {
+    if (elementBounding.left + 40 > gameAreaBounding.left) {
       return true;
     }
     return false;
@@ -78,7 +78,7 @@ class Avatar {
 
   canMoveUp() {
     const elementBounding = this.element.getBoundingClientRect();
-    if (elementBounding.top > gameAreaBounding.top) {
+    if (elementBounding.top + 50 > gameAreaBounding.top) {
       return true;
     }
     return false;
@@ -103,22 +103,25 @@ class Avatar {
     });
   }
 
-  animateImage() {
-    // Get the sprite's current position
-    let sprite = this.element;
-    let currentPositionX = window.getComputedStyle(sprite).backgroundPositionX;
+  //   animateImage() {
+  //     // Get the sprite's current position
+  //     let sprite = this.element;
+  //     let currentPositionX = window.getComputedStyle(sprite).backgroundPositionX;
 
-    // Set the sprite's new position
-    sprite.style.backgroundPositionX =
-      parseInt(currentPositionX) - animationSpeed + "px";
+  //     // Set the sprite's new position
+  //     sprite.style.backgroundPositionX =
+  //       parseInt(currentPositionX) - animationSpeed + "px";
 
-    // If the sprite has reached the beginning of its animation, reset its position
-    if (parseInt(currentPositionX) - animationSpeed <= -spriteWidth) {
-      sprite.style.backgroundPositionX = 0;
-    }
+  //     // If the sprite has reached the beginning of its animation, reset its position
+  //     if (parseInt(currentPositionX) - animationSpeed <= -spriteWidth) {
+  //       sprite.style.backgroundPositionX = 0;
+  //     }
+  stopAvatar() {
     let pressed = false;
     for (const key in pressedKeys) {
+      console.log(pressedKeys);
       if (pressedKeys[key]) {
+        console.log(pressedKeys);
         sprite.style.animationPlayState = "running";
         pressed = true;
         break;
@@ -127,9 +130,9 @@ class Avatar {
     if (!pressed) {
       sprite.style.animationPlayState = "paused";
     }
-
-    setTimeout(animateImage, 1000 / 60);
   }
+
+  // setInterval(animateImage, 1000 / 60);
 
   jump() {
     if (!this.isJumping) {
@@ -161,6 +164,20 @@ class Avatar {
       requestAnimationFrame(jumpAnimation);
     }
   }
+
+  addEvent() {
+    window.addEventListener("keydown", (event) => {
+      if (
+        event.keyCode === 37 ||
+        event.keyCode === 38 ||
+        event.keyCode === 39 ||
+        event.keyCode === 40
+      ) {
+        event.preventDefault(); // prevent page scrolling
+        this.stopAvatar();
+      }
+    });
+  }
 }
 
 class Elements {
@@ -169,36 +186,44 @@ class Elements {
       {
         type: "fire",
         image: "./assets/images/elements (1)/Fire.gif",
+        alt: "fire element",
       },
       {
         type: "wind",
         image: "./assets/images/elements (1)/wind.gif",
+        alt: "wind element",
       },
       {
         type: "water",
         image: "./assets/images/elements (1)/Water.gif",
+        alt: "water element",
       },
       {
         type: "earth",
         image: "./assets/images/elements (1)/Earth.gif",
+        alt: "earth element",
       },
     ];
     this.data1 = [
       {
         type: "fire",
         image: "./assets/images/FireBending.png",
+        alt: "fire element",
       },
       {
         type: "wind",
         image: "./assets/images/AirBending.png",
+        alt: "wind element",
       },
       {
         type: "water",
         image: "./assets/images/WaterBending.png",
+        alt: "water element",
       },
       {
         type: "earth",
         image: "./assets/images/Earth Bending.png",
+        alt: "earth element",
       },
     ];
     this.elements = [];
@@ -211,6 +236,7 @@ class Elements {
       const div = document.createElement("div");
       const img = document.createElement("img");
       img.src = element.image;
+      img.alt = element.alt || "";
       div.appendChild(img);
       div.className = "element-container";
       this.gameArea.appendChild(div);
@@ -225,7 +251,7 @@ class Elements {
     this.data1.forEach((element) => {
       const img = document.createElement("img");
       img.src = element.image;
-      img.alt = element.alt || ""; // Optional: add alt attribute for better accessibility
+      img.alt = element.alt || "";
       img.className = "image-Size";
       container.appendChild(img);
       this.elementsCounter.push(img);
@@ -254,25 +280,19 @@ class Game {
     this.elements.createElementCounterHolder();
     this.animate();
     this.addEventListener();
-    this.pickUpElements = this.pickUpElements.bind(this);
+    this.pickUpElements();
   }
 
   collisionDetectionAvatarElements(element) {
     const avatarBounding = this.avatar.element.getBoundingClientRect();
     const elementsBounding = element.getBoundingClientRect();
     const isInX =
-      avatarBounding.left < elementsBounding.right &&
-      avatarBounding.right > elementsBounding.left;
+      avatarBounding.left + 50 < elementsBounding.right &&
+      avatarBounding.right - 50 > elementsBounding.left;
     const isInY =
       avatarBounding.bottom > elementsBounding.top &&
-      avatarBounding.top < elementsBounding.bottom;
+      avatarBounding.top + 70 < elementsBounding.bottom;
     return isInX && isInY;
-    //   collusionDetectionAvatarElements(element) {
-    //     const avatarBounding = this.avatar.element.getBoundingClientRect();
-    //     console.log(element);
-    //     const elementsBounding = element.getBoundingClientRect();
-    //     console.log(avatarBounding.intersects(elementsBounding));
-    //     return avatarBounding.intersects(elementsBounding);
   }
 
   detectCollisions() {
@@ -289,36 +309,32 @@ class Game {
   pickUpElements() {
     const collidingElements = document.querySelectorAll(".colliding");
     for (const element of collidingElements) {
-      pickedUpElements.push(element);
-      element.remove();
+      if (!pickedUpElements.includes(element)) {
+        element.remove();
+        pickedUpElements.push(element.querySelector("img").alt);
+      }
     }
   }
 
-  //   pickUpElements() {
-  //     for (const element of this.elements.elements) {
-  //       const collision = this.collisionDetectionAvatarElements(element);
-  //       const div = gameArea.querySelector("div");
-  //       if (collision) {
-  //         pickedUpElements.push(element);
-  //         element.remove(div);
-  //         console.log(pickedUpElements);
-  //       }
-  //     }
-  //     return pickedUpElements;
-  //   }
-
   updateElements() {
-    const isPresent = pickedUpElements.includes(element);
-    if (isPresent) {
-      element.classList.add("pop");
-    } else {
-      element.classList.remove("pop");
+    for (const element of this.elements.elementsCounter) {
+      const elementType = element.alt;
+      if (
+        pickedUpElements.includes(elementType) &&
+        this.elements.elementsCounter.find((el) => el.alt === elementType)
+      ) {
+        element.classList.add("pop");
+        continue;
+      } else {
+        element.classList.remove("pop");
+      }
     }
   }
 
   animate() {
     setInterval(() => {
       this.detectCollisions();
+      this.avatar.addEvent();
     }, 1000 / 60);
   }
   //   animate() {
@@ -337,6 +353,22 @@ class Game {
       if (event.key === "e") {
         event.preventDefault();
         this.pickUpElements();
+        for (let element of game.elements.elementsCounter) {
+          console.log(element.alt);
+          //   if (pickedUpElements.includes(element.a)) {
+          //     console.log(!pickedUpElements.includes(element.alt));
+          for (let pUpElement of pickedUpElements) {
+            console.log(pUpElement);
+            if (element.alt !== pUpElement) {
+              this.updateElements();
+            }
+          }
+          //   if (
+          //     pickedUpElements.find((ele) => {
+          //       return ele !== element.alt;
+          //     })
+          // this.updateElements();
+        }
       }
     });
   }
@@ -362,13 +394,6 @@ window.addEventListener("keydown", (event) => {
     case "ArrowDown":
       pressedKeys.down = true;
       break;
-    // case "e":
-    //   event.preventDefault();
-    //   if (game && gameStarted) {
-    //     // Check if the game instance exists and the game has started
-    //     game.pickUpElements(); // Call the pickUpElements method on the game instance
-    //   }
-    //   break;
   }
 });
 
