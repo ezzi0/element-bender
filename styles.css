@@ -74,14 +74,14 @@ main div img {
   right: inherit !important;
 }
 
-/* #timer {
+#timer {
   font-family: "Gluten", cursive;
   padding-top: 2rem;
-
-  &span {
-    color: red;
-  }
-} */
+  color: hsla(39, 81%, 37%, 0.8);
+}
+#timer > span {
+  font: bold;
+}
 
 /* .avatar {
   position: absolute;

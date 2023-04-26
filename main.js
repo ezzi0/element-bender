@@ -5,6 +5,7 @@ let startGameButton = document.getElementById("start-game");
 const modal = document.getElementById("end-game");
 const timer = document.getElementById("time");
 const message = document.getElementById("message");
+const lock = document.querySelector(".lock");
 let avatar;
 let elements;
 let game;
@@ -278,7 +279,7 @@ class Elements {
       timeLeft > 0
     ) {
       clearInterval(interval);
-      door.style.display = "none";
+      lock.style.display = "none";
       message.textContent = "Congratulations! you won";
     } else {
       message.textContent = "Invalid combination. Try again.";
