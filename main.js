@@ -5,6 +5,7 @@ let startGameButton = document.getElementById("start-game");
 const modal = document.getElementById("end-game");
 const timer = document.getElementById("time");
 const message = document.getElementById("message");
+const restartButton = document.getElementById("restart");
 let avatar;
 let enemy;
 let elements;
@@ -13,10 +14,11 @@ let gameStarted = false;
 let obstacles;
 let timeLeft = 60;
 let interval;
+let acceleration;
 
 const pressedKeys = { right: false, left: false, up: false, down: false };
-const pickedUpElements = [];
-const pickedUpMotherFucker = [];
+let pickedUpElements = [];
+let pickedUpMotherFucker = [];
 
 class Avatar {
   constructor() {
@@ -27,6 +29,7 @@ class Avatar {
     this.setAvatarPosition();
     this.animate();
     this.isJumping = false;
+    this.acceleration = 1;
   }
 
   createAvatar() {
@@ -53,18 +56,18 @@ class Avatar {
 
   move(direction) {
     if (direction === "right" && this.canMoveRight()) {
-      this.x += speed;
+      this.x += speed * this.acceleration;
       this.element.classList.remove("sprite-left");
     }
     if (direction === "left" && this.canMoveLeft()) {
-      this.x -= speed;
+      this.x -= speed * this.acceleration;
       this.element.classList.add("sprite-left");
     }
     if (direction === "up" && this.canMoveUp()) {
-      this.y -= speed;
+      this.y -= speed * this.acceleration;
     }
     if (direction === "down" && this.canMoveDown()) {
-      this.y += speed;
+      this.y += speed * this.acceleration;
     }
     this.setAvatarPosition();
   }
@@ -431,7 +434,7 @@ class Game {
     this.animate();
     this.addEventListener();
     this.pickUpElements();
-    console.log(pickedUpElements);
+    this.restartGame();
     // this.throwElements();
   }
 
@@ -473,6 +476,7 @@ class Game {
     let elementToDrop = pickedUpMotherFucker.shift();
     if (pickedUpMotherFucker !== "") {
       gameArea.append(elementToDrop);
+      return;
     }
     if (pickedUpElements !== "") {
       pickedUpElements.shift();
@@ -540,14 +544,17 @@ class Game {
   addEventListener() {
     window.addEventListener("keydown", (event) => {
       if (event.key === " ") {
-        event.preventDefault(); // prevent page scrolling
+        event.preventDefault();
         this.avatar.jump(avatar);
       }
       if (event.key === "t") {
-        console.log("test t");
-        // event.preventDefault();
         this.throwElements();
       }
+
+      if (event.key === "r") {
+        this.avatar.acceleration = 1.5;
+      }
+
       if (event.key === "e") {
         event.preventDefault();
         this.pickUpElements();
@@ -568,6 +575,41 @@ class Game {
         this.combineElements();
       }
     });
+    window.addEventListener("keyup", (event) => {
+      if (event.key === "r") {
+        this.avatar.acceleration = 1;
+      }
+    });
+  }
+  restartGame() {
+    // Remove existing objects from the game area
+    this.avatar.element.remove();
+    this.enemy.element.remove();
+    this.elements.elements.forEach((element) => element.remove());
+    this.obstacles.obstacles.forEach((obstacle) => obstacle.remove());
+
+    // Clear any active intervals or timeouts
+    clearInterval(this.gameIntervalId);
+    clearInterval(this.pickUpElementsIntervalId);
+
+    // Reset the game state
+    pickedUpElements = [];
+    pickedUpMotherFucker = [];
+
+    // Re-initialize the game objects
+    this.avatar = new Avatar();
+    this.enemy = new Enemy(this.avatar);
+    this.elements = new Elements();
+    this.obstacles = new Obstacle();
+    this.obstacles.createObstacle();
+    this.elements.createElement();
+
+    // Restart the game loop and event listeners
+    this.animate();
+    this.addEventListener();
+
+    // Clear any displayed messages or UI elements
+    message.textContent = "";
   }
 }
 
@@ -620,6 +662,10 @@ window.addEventListener("keyup", (event) => {
       pressedKeys.down = false;
       break;
   }
+});
+
+restartButton.addEventListener("click", () => {
+  game.restartGame();
 });
 
 startGameButton.addEventListener("click", startGame);
