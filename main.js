@@ -3,10 +3,15 @@ const gameAreaBounding = gameArea.getBoundingClientRect(); //calculate gamearea 
 const speed = 5;
 let startGameButton = document.getElementById("start-game");
 const modal = document.getElementById("end-game");
+const timer = document.getElementById("time");
+const message = document.getElementById("message");
 let avatar;
 let elements;
 let game;
 let gameStarted = false;
+let obstacles;
+let timeLeft = 60;
+let interval;
 
 const pressedKeys = { right: false, left: false, up: false, down: false };
 const pickedUpElements = [];
@@ -78,7 +83,7 @@ class Avatar {
 
   canMoveUp() {
     const elementBounding = this.element.getBoundingClientRect();
-    if (elementBounding.top + 50 > gameAreaBounding.top) {
+    if (elementBounding.top + 90 > gameAreaBounding.top) {
       return true;
     }
     return false;
@@ -103,25 +108,21 @@ class Avatar {
     });
   }
 
-  //   animateImage() {
-  //     // Get the sprite's current position
-  //     let sprite = this.element;
-  //     let currentPositionX = window.getComputedStyle(sprite).backgroundPositionX;
+  animateImage() {
+    // Get the sprite's current position
+    let sprite = this.element;
+    let currentPositionX = window.getComputedStyle(sprite).backgroundPositionX;
 
-  //     // Set the sprite's new position
-  //     sprite.style.backgroundPositionX =
-  //       parseInt(currentPositionX) - animationSpeed + "px";
+    // Set the sprite's new position
+    sprite.style.backgroundPositionX = parseInt(currentPositionX) - 20 + "px";
 
-  //     // If the sprite has reached the beginning of its animation, reset its position
-  //     if (parseInt(currentPositionX) - animationSpeed <= -spriteWidth) {
-  //       sprite.style.backgroundPositionX = 0;
-  //     }
-  stopAvatar() {
+    // If the sprite has reached the beginning of its animation, reset its position
+    if (parseInt(currentPositionX) - 20 <= -sprite.clientWidth) {
+      sprite.style.backgroundPositionX = 0;
+    }
     let pressed = false;
     for (const key in pressedKeys) {
-      console.log(pressedKeys);
       if (pressedKeys[key]) {
-        console.log(pressedKeys);
         sprite.style.animationPlayState = "running";
         pressed = true;
         break;
@@ -130,9 +131,8 @@ class Avatar {
     if (!pressed) {
       sprite.style.animationPlayState = "paused";
     }
+    // setInterval(this.animateImage, 1000 / 60);
   }
-
-  // setInterval(animateImage, 1000 / 60);
 
   jump() {
     if (!this.isJumping) {
@@ -174,7 +174,7 @@ class Avatar {
         event.keyCode === 40
       ) {
         event.preventDefault(); // prevent page scrolling
-        this.stopAvatar();
+        this.animateImage();
       }
     });
   }
@@ -270,12 +270,77 @@ class Elements {
     div.style.top = randomTop + "px";
     div.style.position = "absolute";
   }
+
+  combineElements() {
+    if (
+      pickedUpElements.includes("air") &&
+      pickedUpElements.includes("fire") &&
+      timeLeft > 0
+    ) {
+      clearInterval(interval);
+      door.style.display = "none";
+      message.textContent = "Congratulations! you won";
+    } else {
+      message.textContent = "Invalid combination. Try again.";
+    }
+  }
+}
+
+class Obstacle {
+  constructor() {
+    this.gameHurdles = [
+      {
+        type: "castle",
+        image: "./assets/images/castle.png",
+        alt: "castle image",
+      },
+      {
+        type: "lock",
+        image: "./assets/images/lock.png",
+        alt: "lock image",
+      },
+    ];
+    this.obstacles = [];
+    this.gameArea = document.querySelector("main");
+  }
+
+  createObstacle() {
+    this.gameHurdles.forEach((item) => {
+      const div = document.createElement("div");
+      const img = document.createElement("img");
+      img.src = item.image;
+      img.alt = item.alt || "";
+      div.appendChild(img);
+      div.className = "castle-container";
+      if (item.type === "lock") {
+        div.className = "lock-container";
+        img.className = "lock";
+      }
+      this.gameArea.appendChild(div);
+      this.setPositionFixed(div);
+      this.obstacles.push(div);
+    });
+  }
+
+  setPositionFixed(div) {
+    const mapWidth = this.gameArea.clientWidth;
+    const mapHeight = this.gameArea.clientHeight;
+    const divWidth = div.clientWidth;
+    const divHeight = div.clientHeight;
+    const rightPos = mapWidth - divWidth;
+    const bottomPos = mapHeight - divHeight;
+    div.style.right = rightPos + "px";
+    div.style.bottom = bottomPos + "px";
+    div.style.position = "absolute";
+  }
 }
 
 class Game {
   constructor() {
     this.avatar = new Avatar();
     this.elements = new Elements();
+    this.obstacles = new Obstacle();
+    this.obstacles.createObstacle();
     this.elements.createElement();
     this.elements.createElementCounterHolder();
     this.animate();
@@ -354,11 +419,9 @@ class Game {
         event.preventDefault();
         this.pickUpElements();
         for (let element of game.elements.elementsCounter) {
-          console.log(element.alt);
           //   if (pickedUpElements.includes(element.a)) {
           //     console.log(!pickedUpElements.includes(element.alt));
           for (let pUpElement of pickedUpElements) {
-            console.log(pUpElement);
             if (element.alt !== pUpElement) {
               this.updateElements();
             }
@@ -375,9 +438,20 @@ class Game {
 }
 
 function startGame(event) {
+  clearInterval(interval);
   event.target.disabled = true;
   game = new Game();
   gameStarted = true;
+  timeLeft = 60;
+  timer.textContent = timeLeft;
+  interval = setInterval(() => {
+    timeLeft--;
+    timer.textContent = timeLeft;
+    if (timeLeft <= 0) {
+      clearInterval(interval);
+      message.textContent = "You lost! Try again.";
+    }
+  }, 1000);
 }
 
 window.addEventListener("keydown", (event) => {

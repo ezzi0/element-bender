@@ -13,6 +13,7 @@ main {
   margin: auto;
   background-color: bisque;
   aspect-ratio: 16 / 9;
+  border-radius: 3%;
   position: relative;
 }
 
@@ -29,7 +30,7 @@ main div img {
     transform: scale(1);
   }
   50% {
-    transform: scale(1.2);
+    transform: scale(2);
   }
   100% {
     transform: scale(1);
@@ -48,6 +49,38 @@ main div img {
 .element-container {
   width: 3rem;
   height: 3rem;
+  z-index: 2;
+}
+
+.castle-container {
+  max-width: 14rem;
+  height: auto;
+  padding: 0.5rem;
+  border-radius: 1rem;
+  z-index: 0;
+}
+
+.lock {
+  max-width: 8rem;
+  height: auto;
+  padding: 0.5rem;
+  border-radius: 1rem;
+  z-index: 0;
+}
+
+.lock-container {
+  left: calc(14rem / 2);
+  transform: translateX(-50%);
+  right: inherit !important;
+}
+
+#timer {
+  font-family: "Gluten", cursive;
+  padding-top: 2rem;
+
+  &span {
+    color: red;
+  }
 }
 
 /* .avatar {
@@ -66,12 +99,13 @@ main div img {
 } */
 
 .sprite {
-  width: 120px;
-  height: 120px;
+  width: 100px;
+  height: 100px;
   background-image: url("./assets/images/enchantressSprite/Walk.png");
   background-size: cover;
   position: relative;
   animation: animateSprite 0.5s steps(7) infinite;
+  z-index: 1;
 }
 
 .sprite-left {
