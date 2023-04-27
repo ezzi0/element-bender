@@ -46,4 +46,12 @@ Avatar Elements is an exciting, interactive game where players control an avatar
 2. Open the HTML file in your preferred web browser.
 3. Start playing the game by using the controls and following the game objectives.
 
+Link to the game: https://ezzi0.github.io/element-bender/
+
+Or
+
+<img src="./assets/images/qrcode_ezzi0.github.io.png" width="216px" height="216px" alt =" QR code"/>
+
+---
+
 Enjoy the game and have fun saving the princess!
