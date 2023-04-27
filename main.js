@@ -15,6 +15,7 @@ let obstacles;
 let timeLeft = 60;
 let interval;
 let acceleration;
+let intervalIDElement;
 
 const pressedKeys = { right: false, left: false, up: false, down: false };
 let pickedUpElements = [];
@@ -193,7 +194,7 @@ class Enemy {
     this.x = Math.random() * gameArea.clientWidth;
     this.y = Math.random() * gameArea.clientHeight;
     this.setEnemyPosition();
-    this.followAvatar();
+    //this.followAvatar();
   }
 
   createEnemy() {
@@ -237,7 +238,7 @@ class Enemy {
         // Collision detection: 5px distance
         this.killAvatar();
       } else {
-        requestAnimationFrame(follow);
+        // requestAnimationFrame(follow);
       }
     };
 
@@ -258,14 +259,17 @@ class Enemy {
     const isColliding = isInX && isInY;
 
     // console.log(isColliding);
-    this.avatar.element.classList.add("killed");
 
     if (isColliding) {
       this.avatar.lives -= 1;
+      console.log(this.avatar.lives);
     }
-    if (this.avatar.lives <= 0) {
-      this.avatar.element.remove();
+    if (this.avatar.lives <= 0 || timeLeft <= 0) {
       // console.log("killed");
+      clearInterval(interval);
+      clearInterval(intervalIDElement);
+      this.avatar.element.classList.add("killed");
+
       const gameOverMessage = document.createElement("div");
       gameOverMessage.innerText = "Game Over";
       gameOverMessage.style.position = "absolute";
@@ -275,7 +279,12 @@ class Enemy {
       gameOverMessage.style.fontSize = "32px";
       gameOverMessage.style.color = "red";
       gameArea.appendChild(gameOverMessage);
+      gameOverMessage.classList.add("remove-GO");
+      restartButton.disabled = false;
+      console.log(restartButton);
+      return true;
     }
+    return false;
   }
 }
 
@@ -328,7 +337,7 @@ class Elements {
     this.elements = [];
     this.elementsCounter = [];
     this.gameArea = document.querySelector("main");
-    setInterval(() => this.updateElementsPosition(), 4000);
+    intervalIDElement = setInterval(() => this.updateElementsPosition(), 4000);
   }
 
   createElement() {
@@ -415,10 +424,13 @@ class Obstacle {
   }
 
   setPositionFixed(div) {
+    console.log(div);
     const mapWidth = this.gameArea.clientWidth;
     const mapHeight = this.gameArea.clientHeight;
+    console.log(mapWidth, mapHeight);
     const divWidth = div.clientWidth;
     const divHeight = div.clientHeight;
+    console.log(divWidth, divHeight);
     const rightPos = mapWidth - divWidth;
     const bottomPos = mapHeight - divHeight;
     div.style.right = rightPos + "px";
@@ -497,7 +509,6 @@ class Game {
         )
       ) {
         element.classList.add("pop");
-        console.log("sjhdjshdjshdjhdjs");
         continue;
       } else {
         element.classList.remove("pop");
@@ -509,7 +520,8 @@ class Game {
     if (
       pickedUpElements.includes("wind") &&
       pickedUpElements.includes("fire") &&
-      timeLeft > 0
+      timeLeft > 0 &&
+      !this.enemy.killAvatar()
     ) {
       const lock = document.querySelector(".lock");
 
@@ -518,11 +530,10 @@ class Game {
       lock.style.display = "none";
       message.classList.add("visible");
       message.textContent = "Congratulations! you saved the princess";
-    } else {
-      if (pickedUpElements.length >= 2) {
-        message.textContent =
-          "The combination of elements you chose doesn't open the lock, Try again.";
-      }
+      restartButton.disabled = "false";
+    }
+    if (this.enemy.killAvatar()) {
+      //restartButton.disabled = "false";
     }
   }
 
@@ -534,6 +545,11 @@ class Game {
         }
       }
       // this.combineElements();
+      if (this.avatar.lives <= 0) {
+        clearInterval(this.gameIntervalId);
+      } else {
+        this.enemy.followAvatar();
+      }
       this.detectCollisions();
       this.avatar.addEvent();
     }, 1000 / 60);
@@ -585,42 +601,48 @@ class Game {
       }
     });
   }
-  //restartGame() {
-  // // Remove existing objects from the game area
-  // this.avatar.element.remove();
-  // this.enemy.element.remove();
-  // this.elements.elements.forEach((element) => element.remove());
-  // this.obstacles.obstacles.forEach((obstacle) => obstacle.remove());
+  restartGame(event) {
+    // Remove existing objects from the game area
+    console.log("RESTART");
+    restartButton.disabled = true;
+    this.avatar.element.remove();
+    this.enemy.element.remove();
+    this.elements.elementsCounter.forEach((element) => element.remove());
+    this.elements.elements.forEach((element) => element.remove());
+    // console.log(this.elements.elements);
+    this.obstacles.obstacles.forEach((obstacle) => obstacle.remove());
+    document.querySelector(".remove-GO").remove();
+    // Clear any active intervals or timeouts
+    clearInterval(this.gameIntervalId);
+    clearInterval(this.pickUpElementsIntervalId);
 
-  // // Clear any active intervals or timeouts
-  // clearInterval(this.gameIntervalId);
-  // clearInterval(this.pickUpElementsIntervalId);
+    // Reset the game state
+    pickedUpElements = [];
+    pickedUpMotherFucker = [];
 
-  // // Reset the game state
-  // pickedUpElements = [];
-  // pickedUpMotherFucker = [];
+    // this.avatar = new Avatar();
+    // this.enemy = new Enemy(this.avatar);
+    // this.elements = new Elements();
+    // this.obstacles = new Obstacle();
+    // this.obstacles.createObstacle();
+    // this.elements.createElement();
 
-  // this.avatar = new Avatar();
-  // this.enemy = new Enemy(this.avatar);
-  // this.elements = new Elements();
-  // this.obstacles = new Obstacle();
-  // this.obstacles.createObstacle();
-  // this.elements.createElement();
+    // // Restart the game loop and event listeners
+    // this.animate();
+    // this.addEventListener();
 
-  // // Restart the game loop and event listeners
-  // this.animate();
-  // this.addEventListener();
+    // // Clear any displayed messages or UI elements
 
-  // // Clear any displayed messages or UI elements
-  // message.textContent = "";
+    startGame();
+  }
 }
 
 function startGame() {
   clearInterval(interval);
-  event.target.disabled = true;
+  //event.target.disabled = true;
   game = new Game();
   gameStarted = true;
-  timeLeft = 60;
+  timeLeft = 30;
   timer.textContent = timeLeft;
   interval = setInterval(() => {
     timeLeft--;
@@ -628,22 +650,24 @@ function startGame() {
     if (timeLeft <= 0) {
       clearInterval(interval);
       message.textContent = "You lost! Try again.";
+      game.enemy.killAvatar();
+      clearInterval(game.gameIntervalId);
     }
   }, 1000);
+  console.log(timeLeft);
 }
+// window.onload = function () {
+//   let reloading = sessionStorage.getItem("reloading");
+//   if (reloading) {
+//     sessionStorage.removeItem("reloading");
+//     startGame();
+//   }
+// };
 
-window.onload = function () {
-  let reloading = sessionStorage.getItem("reloading");
-  if (reloading) {
-    sessionStorage.removeItem("reloading");
-    startGame();
-  }
-};
-
-function reloadPage() {
-  sessionStorage.setItem("reloading", "true");
-  document.location.reload();
-}
+// function reloadPage() {
+//   sessionStorage.setItem("reloading", "true");
+//   document.location.reload();
+// }
 
 window.addEventListener("keydown", (event) => {
   switch (event.key) {
@@ -679,8 +703,12 @@ window.addEventListener("keyup", (event) => {
   }
 });
 
-restartButton.addEventListener("click", () => {
-  reloadPage();
+restartButton.addEventListener("click", (e) => {
+  game.restartGame(e);
 });
 
-startGameButton.addEventListener("click", startGame);
+startGameButton.addEventListener("click", () => {
+  startGameButton.disabled = true;
+  restartButton.disabled = true;
+  startGame();
+});
