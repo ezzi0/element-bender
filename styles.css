@@ -206,13 +206,46 @@ main div img {
   width: 100%;
 }
 
+.killed {
+  rotate: -90deg;
+  /* -webkit-box-shadow: -21px 0px 24px -1px #ff0000;
+  box-shadow: -50px -2px 42px -30px #ff0000; */
+}
+
+.killed::before {
+  content: "";
+  height: 120px;
+  width: 20px;
+  background-color: red;
+  display: block;
+  position: absolute;
+  left: 18px;
+  filter: blur(9px);
+}
+
 #message {
+  display: none;
   font: bold;
-  size: 20rem;
+  height: auto;
+  width: auto;
+  padding: 1rem;
   text-align: center;
+  border: 1px solid hsla(249, 60%, 30%, 0.8);
+  background-color: hsla(249, 60%, 30%, 0.8);
+  color: white;
+  position: absolute;
+  border-radius: 5%;
+  top: 50%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 4;
 }
 
 #restart {
   margin-top: 1rem;
   margin-bottom: 1rem;
+}
+
+.visible {
+  display: block !important;
 }

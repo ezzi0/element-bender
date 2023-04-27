@@ -232,7 +232,8 @@ class Enemy {
         this.setEnemyPosition();
       }
 
-      if (distance <= 1) {
+      if (distance <= 5) {
+        // console.log("test");
         // Collision detection: 5px distance
         this.killAvatar();
       } else {
@@ -256,11 +257,15 @@ class Enemy {
 
     const isColliding = isInX && isInY;
 
+    // console.log(isColliding);
+    this.avatar.element.classList.add("killed");
+
     if (isColliding) {
       this.avatar.lives -= 1;
     }
     if (this.avatar.lives <= 0) {
       this.avatar.element.remove();
+      // console.log("killed");
       const gameOverMessage = document.createElement("div");
       gameOverMessage.innerText = "Game Over";
       gameOverMessage.style.position = "absolute";
@@ -434,7 +439,6 @@ class Game {
     this.animate();
     this.addEventListener();
     this.pickUpElements();
-    this.restartGame();
     // this.throwElements();
   }
 
@@ -502,7 +506,6 @@ class Game {
   }
 
   combineElements() {
-    console.log(pickedUpElements);
     if (
       pickedUpElements.includes("wind") &&
       pickedUpElements.includes("fire") &&
@@ -513,6 +516,7 @@ class Game {
       clearInterval(interval);
       clearInterval(this.gameIntervalId);
       lock.style.display = "none";
+      message.classList.add("visible");
       message.textContent = "Congratulations! you saved the princess";
     } else {
       if (pickedUpElements.length >= 2) {
@@ -581,39 +585,37 @@ class Game {
       }
     });
   }
-  restartGame() {
-    // Remove existing objects from the game area
-    this.avatar.element.remove();
-    this.enemy.element.remove();
-    this.elements.elements.forEach((element) => element.remove());
-    this.obstacles.obstacles.forEach((obstacle) => obstacle.remove());
+  //restartGame() {
+  // // Remove existing objects from the game area
+  // this.avatar.element.remove();
+  // this.enemy.element.remove();
+  // this.elements.elements.forEach((element) => element.remove());
+  // this.obstacles.obstacles.forEach((obstacle) => obstacle.remove());
 
-    // Clear any active intervals or timeouts
-    clearInterval(this.gameIntervalId);
-    clearInterval(this.pickUpElementsIntervalId);
+  // // Clear any active intervals or timeouts
+  // clearInterval(this.gameIntervalId);
+  // clearInterval(this.pickUpElementsIntervalId);
 
-    // Reset the game state
-    pickedUpElements = [];
-    pickedUpMotherFucker = [];
+  // // Reset the game state
+  // pickedUpElements = [];
+  // pickedUpMotherFucker = [];
 
-    // Re-initialize the game objects
-    this.avatar = new Avatar();
-    this.enemy = new Enemy(this.avatar);
-    this.elements = new Elements();
-    this.obstacles = new Obstacle();
-    this.obstacles.createObstacle();
-    this.elements.createElement();
+  // this.avatar = new Avatar();
+  // this.enemy = new Enemy(this.avatar);
+  // this.elements = new Elements();
+  // this.obstacles = new Obstacle();
+  // this.obstacles.createObstacle();
+  // this.elements.createElement();
 
-    // Restart the game loop and event listeners
-    this.animate();
-    this.addEventListener();
+  // // Restart the game loop and event listeners
+  // this.animate();
+  // this.addEventListener();
 
-    // Clear any displayed messages or UI elements
-    message.textContent = "";
-  }
+  // // Clear any displayed messages or UI elements
+  // message.textContent = "";
 }
 
-function startGame(event) {
+function startGame() {
   clearInterval(interval);
   event.target.disabled = true;
   game = new Game();
@@ -628,6 +630,19 @@ function startGame(event) {
       message.textContent = "You lost! Try again.";
     }
   }, 1000);
+}
+
+window.onload = function () {
+  let reloading = sessionStorage.getItem("reloading");
+  if (reloading) {
+    sessionStorage.removeItem("reloading");
+    startGame();
+  }
+};
+
+function reloadPage() {
+  sessionStorage.setItem("reloading", "true");
+  document.location.reload();
 }
 
 window.addEventListener("keydown", (event) => {
@@ -665,7 +680,7 @@ window.addEventListener("keyup", (event) => {
 });
 
 restartButton.addEventListener("click", () => {
-  game.restartGame();
+  reloadPage();
 });
 
 startGameButton.addEventListener("click", startGame);
