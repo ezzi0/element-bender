@@ -55,10 +55,21 @@ main div img {
 
 .castle-container {
   max-width: 14rem;
+  position: absolute;
   height: auto;
   padding: 0.5rem;
+  top: 0;
+  left: 0;
   border-radius: 1rem;
   z-index: 0;
+}
+
+.wrapper {
+  position: relative;
+  height: 14rem;
+  top: -24rem;
+  left: -1rem;
+  width: 14rem;
 }
 
 .lock {
@@ -67,12 +78,18 @@ main div img {
   padding: 0.5rem;
   border-radius: 1rem;
   z-index: 0;
+  position: absolute;
+  left: -3rem;
 }
 
 .lock-container {
-  left: calc(14rem / 2);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  /* left: calc(14rem / 2);
   transform: translateX(-50%);
-  right: inherit !important;
+  right: inherit !important; */
 }
 
 #timer {

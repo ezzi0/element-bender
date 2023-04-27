@@ -406,36 +406,39 @@ class Obstacle {
   }
 
   createObstacle() {
+    const wrapper = document.createElement("div");
     this.gameHurdles.forEach((item) => {
       const div = document.createElement("div");
       const img = document.createElement("img");
       img.src = item.image;
       img.alt = item.alt || "";
       div.appendChild(img);
+      wrapper.append(div);
+      wrapper.classList.add("wrapper");
       div.className = "castle-container";
       if (item.type === "lock") {
         div.className = "lock-container";
         img.className = "lock";
       }
-      this.gameArea.appendChild(div);
-      this.setPositionFixed(div);
-      this.obstacles.push(div);
+      this.setPositionFixed(wrapper);
+      this.obstacles.push(wrapper);
     });
+    this.gameArea.appendChild(wrapper);
   }
 
   setPositionFixed(div) {
     console.log(div);
-    const mapWidth = this.gameArea.clientWidth;
-    const mapHeight = this.gameArea.clientHeight;
-    console.log(mapWidth, mapHeight);
-    const divWidth = div.clientWidth;
-    const divHeight = div.clientHeight;
-    console.log(divWidth, divHeight);
-    const rightPos = mapWidth - divWidth;
-    const bottomPos = mapHeight - divHeight;
-    div.style.right = rightPos + "px";
-    div.style.bottom = bottomPos + "px";
-    div.style.position = "absolute";
+    // const mapWidth = this.gameArea.clientWidth;
+    // const mapHeight = this.gameArea.clientHeight;
+    // console.log("mapWidth: ", mapWidth, mapHeight);
+    // const divWidth = div.clientWidth;
+    // const divHeight = div.clientHeight;
+    // console.log("divWidth divHeight: ", divWidth, divHeight);
+    // const rightPos = mapWidth - divWidth;
+    // const bottomPos = mapHeight - divHeight;
+    // div.style.right = rightPos + "px";
+    // div.style.bottom = bottomPos + "px";
+    // div.style.position = "absolute";
   }
 }
 
