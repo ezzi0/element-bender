@@ -30,7 +30,7 @@ class Avatar {
     this.setAvatarPosition();
     this.animate();
     this.isJumping = false;
-    this.acceleration = 1;
+    this.acceleration = 1.5;
   }
 
   createAvatar() {
@@ -233,7 +233,7 @@ class Enemy {
         this.setEnemyPosition();
       }
 
-      if (distance <= 5) {
+      if (distance <= 4) {
         // console.log("test");
         // Collision detection: 5px distance
         this.killAvatar();
@@ -244,6 +244,42 @@ class Enemy {
 
     follow();
   }
+  // followAvatar() {
+  //   const speed = 1;
+  //   const minDistance = 2;
+
+  //   const follow = () => {
+  //     const dx = this.avatar.x - this.x;
+  //     const dy = this.avatar.y - this.y;
+  //     const distance = Math.sqrt(dx * dx + dy * dy);
+
+  //     if (distance > minDistance) {
+  //       const moveX = dx / distance;
+  //       const moveY = dy / distance;
+
+  //       const newX = this.x + moveX * speed;
+  //       const newY = this.y + moveY * speed;
+
+  //       if (newX > this.x) {
+  //         this.element.classList.remove("enemy-left");
+  //       } else if (newX < this.x) {
+  //         this.element.classList.add("enemy-left");
+  //       }
+
+  //       this.x = newX;
+  //       this.y = newY;
+  //       this.setEnemyPosition();
+  //     }
+
+  //     if (distance <= minDistance) {
+  //       this.killAvatar();
+  //     } else {
+  //       requestAnimationFrame(follow); // Make the enemy more responsive by using requestAnimationFrame
+  //     }
+  //   };
+  //   requestAnimationFrame(follow);
+  //   follow();
+  // }
 
   killAvatar() {
     const enemyBounding = this.element.getBoundingClientRect();
@@ -257,6 +293,7 @@ class Enemy {
       enemyBounding.bottom > avatarBounding.top;
 
     const isColliding = isInX && isInY;
+    console.log(isColliding);
 
     // console.log(isColliding);
 
@@ -337,7 +374,7 @@ class Elements {
     this.elements = [];
     this.elementsCounter = [];
     this.gameArea = document.querySelector("main");
-    intervalIDElement = setInterval(() => this.updateElementsPosition(), 4000);
+    intervalIDElement = setInterval(() => this.updateElementsPosition(), 2000);
   }
 
   createElement() {
@@ -575,7 +612,7 @@ class Game {
       }
 
       if (event.key === "r") {
-        this.avatar.acceleration = 1.5;
+        this.avatar.acceleration = 1.4;
       }
 
       if (event.key === "e") {
@@ -645,7 +682,7 @@ function startGame() {
   //event.target.disabled = true;
   game = new Game();
   gameStarted = true;
-  timeLeft = 30;
+  timeLeft = 25;
   timer.textContent = timeLeft;
   interval = setInterval(() => {
     timeLeft--;
@@ -673,7 +710,7 @@ function startGame() {
 // }
 
 window.addEventListener("keydown", (event) => {
-  switch (event.key) {
+  switch (event.code) {
     case "ArrowRight":
       pressedKeys.right = true;
       break;
@@ -686,11 +723,23 @@ window.addEventListener("keydown", (event) => {
     case "ArrowDown":
       pressedKeys.down = true;
       break;
+    case "KeyD":
+      pressedKeys.right = true;
+      break;
+    case "KeyA":
+      pressedKeys.left = true;
+      break;
+    case "KeyW":
+      pressedKeys.up = true;
+      break;
+    case "KeyS":
+      pressedKeys.down = true;
+      break;
   }
 });
 
 window.addEventListener("keyup", (event) => {
-  switch (event.key) {
+  switch (event.code) {
     case "ArrowRight":
       pressedKeys.right = false;
       break;
@@ -701,6 +750,18 @@ window.addEventListener("keyup", (event) => {
       pressedKeys.up = false;
       break;
     case "ArrowDown":
+      pressedKeys.down = false;
+      break;
+    case "KeyD":
+      pressedKeys.right = false;
+      break;
+    case "KeyA":
+      pressedKeys.left = false;
+      break;
+    case "KeyW":
+      pressedKeys.up = false;
+      break;
+    case "KeyS":
       pressedKeys.down = false;
       break;
   }

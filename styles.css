@@ -26,6 +26,10 @@ main div img {
   background: transparent;
 }
 
+#menu {
+  padding: 0.8rem;
+}
+
 @keyframes popImage {
   0% {
     transform: scale(1);
@@ -94,7 +98,7 @@ main div img {
 
 #timer {
   font-family: "Gluten", cursive;
-  padding-top: 2rem;
+  padding-top: 0.7rem;
   color: hsla(39, 81%, 37%, 0.8);
 }
 #timer > span {
@@ -178,7 +182,7 @@ main div img {
 
 .button {
   display: inline-block;
-  padding: 0.35rem 1.25rem;
+  padding: 0.35rem 1.15rem;
   border-radius: 2rem;
   color: #fff;
   text-transform: uppercase;
