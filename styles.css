@@ -98,7 +98,7 @@ main div img {
 
 #timer {
   font-family: "Gluten", cursive;
-  padding-top: 0.7rem;
+  padding-top: 0.5rem;
   color: hsla(39, 81%, 37%, 0.8);
 }
 #timer > span {
@@ -182,7 +182,7 @@ main div img {
 
 .button {
   display: inline-block;
-  padding: 0.35rem 1.15rem;
+  padding: 0.25rem 0.85rem;
   border-radius: 2rem;
   color: #fff;
   text-transform: uppercase;

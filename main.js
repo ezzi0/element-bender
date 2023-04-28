@@ -30,7 +30,7 @@ class Avatar {
     this.setAvatarPosition();
     this.animate();
     this.isJumping = false;
-    this.acceleration = 1.5;
+    this.acceleration = 1.4;
   }
 
   createAvatar() {
@@ -374,7 +374,7 @@ class Elements {
     this.elements = [];
     this.elementsCounter = [];
     this.gameArea = document.querySelector("main");
-    intervalIDElement = setInterval(() => this.updateElementsPosition(), 2000);
+    intervalIDElement = setInterval(() => this.updateElementsPosition(), 1500);
   }
 
   createElement() {
